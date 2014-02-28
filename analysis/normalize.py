@@ -32,7 +32,8 @@ class plain_offset(object):
         The rows and columns where the offset will be estimated. If `None`,
         all rows or columns are used for estimation, respectively.
     frame : 2dim ndarray, Frame, optional
-        The frame to correct.
+        The frame to estimate from. If `None` (default) a callable object is
+        returned.
     """
     def __new__(cls, offset_rows=None, offset_cols=None, frame=None):
         if frame is None:
@@ -74,7 +75,8 @@ class rowwise_offset(object):
     offset_cols: valid ndarray index object, e.g. slice or None
         The columns where the per-row offset will be estimated.
     frame : 2dim ndarray, Frame, optional
-        The frame to estimate from.
+        The frame to estimate from. If `None` (default) a callable object is
+        returned.
     """
     def __new__(cls, offset_cols, frame=None):
         if frame is None:
@@ -146,7 +148,7 @@ class FrameNormalizer(object):
             try:
                 fpn_path = fpn.info["path"]
                 cmt = "FPN('{0}') subtracted".format(fpn_path)
-            except AttributeError, KeyError:
+            except (AttributeError, KeyError):
                 cmt = "FPN subtracted"
 
             if info.get("comment"):
