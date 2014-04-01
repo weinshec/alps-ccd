@@ -125,7 +125,7 @@ def filter_list(spotlist, predicate):
         returned list.
 
         For possible predicates see :func:`pred_npx_equals` and
-        :func:`pred_npx_gtreq`.
+        :func:`pred_npx_gtr`.
 
     Returns
     -------
