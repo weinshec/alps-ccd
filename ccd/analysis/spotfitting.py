@@ -1,9 +1,40 @@
 import numpy as np
 import scipy.optimize
 
-import tools
-
 __all__ = ["GaussContExpo"]
+
+def fwhm(data, axis=None):
+    """Calculate the indices of the FWHM for the projections on the axis.
+
+    Parameters
+    ----------
+    data : array_like
+        n-dim data
+    axis : int, optional
+        The axis on which the projection is taken. If axis is `None` return
+        a list of all FWHM index pairs.
+
+    Returns
+    -------
+    idx : list of pairs of int
+        The indices of the fwhm. If axis is specified a plain pair is
+        returned.
+
+    See
+    ---
+    For usage of `apply_over_axes` see:
+    http://www.mail-archive.com/numpy-discussion@lists.sourceforge.net/msg03469.html
+    """
+    if axis is None:
+        return [fwhm(data, ax) for ax in xrange(data.ndim)]
+
+    axes = np.r_[0:axis, axis+1:data.ndim]
+    d = np.apply_over_axes(np.mean, data, axes).flatten()
+    imax = d.argmax()
+    hmax = 0.5 * d[imax]
+    i0 = np.where(d[:imax] <= hmax)[0][-1]
+    i1 = np.where(d[imax:] <= hmax)[0][0] + imax
+    return i0, i1
 
 
 class GaussContExpo(object):
@@ -34,8 +65,8 @@ class GaussContExpo(object):
 
     def initial_guess(self, data):
         mu0, mu1 = np.unravel_index(data.argmax(), data.shape)
-        fwhm0 = tools.fwhm(data[:,mu1] - data[:,mu1].min())[0]
-        fwhm1 = tools.fwhm(data[mu0] - data[mu0].min())[0]
+        fwhm0 = fwhm(data[:,mu1] - data[:,mu1].min())[0]
+        fwhm1 = fwhm(data[mu0] - data[mu0].min())[0]
 
         self.update_params(
                 data.max() - data.min(),

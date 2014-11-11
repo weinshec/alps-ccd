@@ -1,11 +1,8 @@
-import numpy as np
-
 from frame import Frame
 from frameset import FrameSet
 from info import FrameSetInfo
 
-__all__ = ["frame_iter", "get_frame",
-           "fwhm"]
+__all__ = ["frame_iter", "get_frame"]
 
 
 def frame_iter(paths):
@@ -18,7 +15,6 @@ def frame_iter(paths):
             fs = FrameSet.load_file(p)
             for i in xrange(fs.num_frames):
                 yield fs.get_frame(i, retplain=False)
-
 
 
 def get_frame(framepath):
