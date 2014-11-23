@@ -13,6 +13,7 @@ The code was designed against **Python2** and provides a ``setup.py``
 containing metadata and dependencies. Install it via ``pip``, i.e.:
 
 .. code:: shell
+
    cd alps-ccd
    pip install -e .
 
