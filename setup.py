@@ -7,5 +7,5 @@ setup(name='ALPS-CCD',
       author='Jan Eike von Seggern',
       author_email='jan.eike.von.seggern@desy.de',
       packages=['ccd', 'ccd.analysis', 'ccd.analysis.hotpixels', 'ccd.io'],
-      requires=['numpy', 'scipy', 'matplotlib']
+      install_requires=['numpy', 'scipy', 'matplotlib']
       )
