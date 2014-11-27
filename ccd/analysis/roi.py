@@ -4,9 +4,10 @@ import logging
 import numpy as np
 # Python{2,3} compatibility 
 try:
-    from itertools import izip, product
+    from itertools import izip as zip
 except ImportError:
-    from itertools import product
+    pass
+from itertools import product
 
 try:
     from scipy import weave
@@ -337,7 +338,7 @@ def get_boundary_mask_pure_python(spot, withdiag=False, width=1, out=None, where
         bounds = out
     bounds.fill(False)
 
-    t = range(-width, width+1)
+    t = list(range(-width, width+1))
     if withdiag:
         idx_deltas = list(product(t, t))
     else:
@@ -350,7 +351,7 @@ def get_boundary_mask_pure_python(spot, withdiag=False, width=1, out=None, where
         Y, X = np.where(spot)
     else:
         Y, X = where
-    for y, x in izip(Y, X):
+    for y, x in zip(Y, X):
         for dy, dx in idx_deltas:
             t = y + dy
             s = x + dx
