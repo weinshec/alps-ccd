@@ -1,13 +1,17 @@
 """A collection of patters and ROIs.
 """
+
 import logging
-import numpy as np
+import math
+
 # Python{2,3} compatibility 
 try:
     from itertools import izip as zip
 except ImportError:
     pass
 from itertools import product
+
+import numpy as np
 
 try:
     from scipy import weave
@@ -113,6 +117,13 @@ class ROI(object):
         inv._mask = np.logical_not(self.mask)
         return inv
 
+def py2_round(x):
+    """
+    See http://python3porting.com/differences.html#rounding-behavior
+    """
+    return int(math.floor((x) + math.copysign(0.5, x)))
+
+
 
 class MovableROI(ROI):
     fmt = "<{self.__class__.__name__} object of shape:{self.shape} at [x:{self.x} y:{self.y}]>"
@@ -154,12 +165,12 @@ class RectangleROI(MovableROI):
     def _get_mask(self):
         mask = np.zeros(self.shape, dtype=np.bool)
         hh = 0.5 * self.height
-        ymin = max(0, int(round(self.y - hh)))
-        ymax = min(self.shape[0], int(round(self.y + hh)))
+        ymin = max(0, py2_round(self.y - hh))
+        ymax = min(self.shape[0], py2_round(self.y + hh))
 
         hw = 0.5 * self.width
-        xmin = max(0, int(round(self.x - hw)))
-        xmax = min(self.shape[1], int(round(self.x + hw)))
+        xmin = max(0, py2_round(self.x - hw))
+        xmax = min(self.shape[1], py2_round(self.x + hw))
 
         mask[ymin:ymax, xmin:xmax] = True
         return mask
@@ -177,7 +188,8 @@ class BoxROI(MovableROI):
         mask = np.zeros(self.shape, dtype=np.bool)
 
         # Simple short-cut
-        rint = lambda x: int(round(x))
+        # TODO [Python3] round() is not rounding n.5 to n+1 anymore
+        rint = lambda x: int(py2_round(x))
 
         # Set outer rectangle True
         hh = 0.5 * self.outer_height
@@ -342,7 +354,7 @@ def get_boundary_mask_pure_python(spot, withdiag=False, width=1, out=None, where
     if withdiag:
         idx_deltas = list(product(t, t))
     else:
-        idx_deltas = [(dx, dy) for dx in t for dy in t if (abs(dx) + abs(dy) <= width)]
+        idx_deltas = [(dy, dx) for dx in t for dy in t if (abs(dx) + abs(dy) <= width)]
     idx_deltas.remove((0, 0))
 
     n_y, n_x = bounds.shape
