@@ -4,8 +4,9 @@ import os.path
 from copy import copy, deepcopy
 import numpy as np
 from scipy import stats
-from frame import Frame
-import info
+
+from .frame import Frame
+from . import info
 
 
 class FrameSet(object):
@@ -456,5 +457,5 @@ class FrameSet(object):
             for iy in xrange(1, ny-1):
                 pixcorr[ix, iy] = calc_pix_corr(ix, iy)
             if prnt:
-                print "Finished column", ix, "of", nx-2
+                print("Finished column", ix, "of", nx-2)
         return pixcorr

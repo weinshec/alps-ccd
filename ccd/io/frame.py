@@ -1,7 +1,7 @@
 import os.path
 import numpy as np
 
-from info import FrameInfo
+from .info import FrameInfo
 
 class Frame(np.ndarray):
     """CCD frame container stores the pixel data in a numpy.array and meta

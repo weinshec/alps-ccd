@@ -1,8 +1,12 @@
-import itertools
 import numpy as np
+from itertools import cycle
+# Python{2,3} compatibility 
+try:
+    from itertools import izip as zip
+except:
+    pass
+
 from matplotlib import pyplot as plt
-
-
 
 def profiles(frames, axes=None, corr_offset=False):
     if axes is None:
@@ -22,10 +26,10 @@ def profiles(frames, axes=None, corr_offset=False):
         data_0 -= np.mean(data_0, axis=0)
         data_1 -= np.mean(data_1, axis=0)
 
-    colors = itertools.cycle("rgbm")
-    linestyles = itertools.cycle(("-", "--", ":"))
+    colors = cycle("rgbm")
+    linestyles = cycle(("-", "--", ":"))
 
-    for i, c, ls in itertools.izip(xrange(len(frames)), colors, linestyles):
+    for i, c, ls in zip(xrange(len(frames)), colors, linestyles):
         axes[0].plot(data_0[i], color=c, linestyle=ls)
         axes[1].plot(data_1[i], color=c, linestyle=ls)
 

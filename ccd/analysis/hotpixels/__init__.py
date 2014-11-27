@@ -1,2 +1,2 @@
-from spotlist import *
-from iterative import *
+from .spotlist import *
+from .iterative import *

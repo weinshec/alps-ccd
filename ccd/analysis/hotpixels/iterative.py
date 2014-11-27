@@ -2,7 +2,7 @@ from itertools import product
 import numpy as np
 from scipy import stats
 
-from ccd.analysis import roi
+from .. import roi
 
 __all__ = ['IterativeFlagger', 'flag_per_row', 'flag_in_neighborhood', 'DirectNeighborFlagged']
 

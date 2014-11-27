@@ -1,6 +1,6 @@
-from frame import Frame
-from frameset import FrameSet
-from info import FrameSetInfo
+from .frame import Frame
+from .frameset import FrameSet
+from .info import FrameSetInfo
 
 __all__ = ["frame_iter", "get_frame"]
 

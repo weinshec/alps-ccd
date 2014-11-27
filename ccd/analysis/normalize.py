@@ -1,7 +1,7 @@
 from functools import wraps
 import numpy as np
-from ccd.io.frame import Frame
 
+from ccd.io.frame import Frame
 
 
 def _safe_slice(a):

@@ -2,13 +2,17 @@
 """
 import logging
 import numpy as np
-from itertools import izip, product
+# Python{2,3} compatibility 
+try:
+    from itertools import izip, product
+except ImportError:
+    from itertools import product
 
 try:
     from scipy import weave
 except ImportError:
     logging.error("Failed to import scipy.weave"
-                  "\n  get_boundary_mask may be slow!")
+                  "\n  get_boundary_mask() may be slow!")
     weave = None
 
 

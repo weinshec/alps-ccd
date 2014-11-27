@@ -40,7 +40,7 @@ def tokenize_basename(path):
     m = re.search(r"(?P<comment>.*) (?P<exposure>\S*[a-z]) (?P<temperature>\S*[KC])", basename)
     try:
         return m.groupdict()
-    except Exception, err:
+    except Exception as err:
         raise InfoError("Failed to tokenize basename({0!r}): {1}".format(path, err))
 
 
@@ -64,7 +64,7 @@ class FrameInfo(dict):
         if type(new) != t:
             try:
                 new = t(new)
-            except StandardError, e:
+            except StandardError as e:
                 raise TypeError("Conversion to %s failed for %s: %s" % (t, key, e))
 
         dict.__setitem__(self, key, new)
@@ -226,7 +226,7 @@ def QE_measurement_XEVA(abspath):
     # parse date
     try:
         fi["datetime"] = get_date(os.path.basename(daydir))
-    except ValueError, e:
+    except ValueError as e:
         raise ValueError("Failed to tokenize date for %s: %s" % (abspath, e))
 
     return fi
@@ -276,7 +276,7 @@ class TarFile(object):
 
         try:
             framenum = int(os.path.splitext(n)[0].split("_")[-1])
-        except StandardError, err:
+        except StandardError as err:
             raise ValueError("Failed to extract frame number: %s" % err)
 
         fi["comment"] = "Frame #%d" % framenum
@@ -296,7 +296,7 @@ class TarFile(object):
             fi["datetime"] = get_date(part)
         except ValueError:
             pass
-        # except ValueError, e:
+        # except ValueError as e:
             # raise InfoError("Failed to tokenize date for %s: %s" % (self.tarpath, e))
 
         return fi
