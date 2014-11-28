@@ -31,7 +31,7 @@ class FrameSet(object):
         phdu = pyfits.PrimaryHDU()
         self.info.update_fits_header(phdu.header)
         hdus = [phdu]
-        for i in xrange(self.num_frames):
+        for i in range(self.num_frames):
             imhdu = pyfits.ImageHDU(data=self.get_frame(i, retplain=True))
             self.info.update_fits_header(imhdu.header, i)
             hdus.append(imhdu)
@@ -88,7 +88,7 @@ class FrameSet(object):
             return fs
 
         elif ext == ".spe":
-            from spe import SPEReader
+            from .spe import SPEReader
             reader = SPEReader(path=path)
             if reader.num_frames == 1:
                 raise ValueError("single-frame SPE files are not supported by FrameSet")
@@ -100,7 +100,7 @@ class FrameSet(object):
             fi["ro_mode"] = reader.readoutrate
             fi["camera"] = "PIXIS"
             frames = []
-            for i in xrange(reader.num_frames):
+            for i in range(reader.num_frames):
                 fi["comment"] = "%s Frame #%d" % (os.path.basename(path), i)
                 fi["path"] = "%s%sframe %d" % (path, info.FrameSetInfo.framenumsep, i)
                 frames.append(Frame(reader.data[i], fi))
@@ -171,7 +171,7 @@ class FrameSet(object):
         # copy the info data
         info = copy(self.info)
         if comment:
-            if info.has_key("set_comment"):
+            if "set_comment" in info:
                 info["set_comment"] += " " + comment
             else:
                 info["set_comment"] = comment
@@ -197,7 +197,7 @@ class FrameSet(object):
         if self.info is None:
             self.info = info.FrameSetInfo()
             for key in test_keys:
-                if fi.has_key(key):
+                if key in fi:
                     self.info[key] = fi[key]
 
             self.info["comments"] = [fi.get("comment", "")]
@@ -206,7 +206,7 @@ class FrameSet(object):
 
         else:
             for key in test_keys:
-                if fi.has_key(key) and fi[key] != self.info[key]:
+                if key in fi and fi[key] != self.info[key]:
                     raise ValueError("Frame %s differs from set: %s vs. %s" % (key, fi[key], self.info[key]))
             self.info["comments"].append(fi.get("comment", ""))
             self.info["datetime"].append(fi.get("datetime"))
@@ -300,7 +300,7 @@ class FrameSet(object):
             return self._frames[i]
         else:
             copy_keys = ("temperature", "exposure", "gain", "ro_mode", "camera")
-            fi = info.FrameInfo((k, self.info[k]) for k in copy_keys if self.info.has_key(k))
+            fi = info.FrameInfo((k, self.info[k]) for k in copy_keys if k in self.info)
             fi["datetime"] = self.info["datetime"][i]
             fi["comment"] = self.info["comments"][i]
             fi["path"] = self.info["paths"][i]
@@ -442,8 +442,8 @@ class FrameSet(object):
             val = 0.0
             # the values of the central pixel
             t_central = frames[:, ix, iy]
-            for dx in xrange(-1, 2):
-                for dy in xrange(-1, 2):
+            for dx in range(-1, 2):
+                for dy in range(-1, 2):
                     if dx == 0 and dy == 0:
                         continue
                     t_neighbour = frames[:, ix+dx, iy+dy]
@@ -453,8 +453,8 @@ class FrameSet(object):
 
             return np.sqrt(val/8.0)
 
-        for ix in xrange(1, nx-1):
-            for iy in xrange(1, ny-1):
+        for ix in range(1, nx-1):
+            for iy in range(1, ny-1):
                 pixcorr[ix, iy] = calc_pix_corr(ix, iy)
             if prnt:
                 print("Finished column", ix, "of", nx-2)

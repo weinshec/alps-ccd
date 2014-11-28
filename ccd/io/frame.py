@@ -110,7 +110,7 @@ class Frame(np.ndarray):
     readable_extensions.append(".spe")
     @classmethod
     def load_spe(cls, fileobj):
-        from spe import SPEReader
+        from .spe import SPEReader
         reader = SPEReader(file=fileobj)
         fi = FrameInfo()
         fi["temperature"] = reader.temp + 273.16 # convert from deg.Celsius to Kelvin

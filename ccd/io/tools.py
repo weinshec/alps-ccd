@@ -13,7 +13,7 @@ def frame_iter(paths):
             yield fr
         except ValueError:
             fs = FrameSet.load_file(p)
-            for i in xrange(fs.num_frames):
+            for i in range(fs.num_frames):
                 yield fs.get_frame(i, retplain=False)
 
 

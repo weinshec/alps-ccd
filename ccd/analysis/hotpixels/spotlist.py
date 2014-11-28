@@ -4,6 +4,7 @@ dumped and loaded with `pickle`. Additionally, this module contains some
 functions that analyse the data of a spot list.
 """
 
+# Python 2 & 3 compatibility
 try:
     import cPickle as pickle
 except ImportError:
@@ -80,7 +81,7 @@ def group_pixels(spotlist):
         if not hasattr(new, k):
             setattr(new, k, getattr(spotlist, k))
     labeled, n_spots = ndimage.label(mask, structure=np.ones((3,3)))
-    for i in xrange(n_spots):
+    for i in range(n_spots):
         t = list(np.flatnonzero(i+1 == labeled))
         assert len(t) > 0
         new.append(t)

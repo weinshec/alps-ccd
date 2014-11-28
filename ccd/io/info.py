@@ -2,6 +2,7 @@ import os.path
 import re
 from operator import indexOf
 import datetime
+import collections
 
 class InfoError(Exception):
     pass
@@ -51,7 +52,7 @@ class FrameInfo(dict):
     _allowed_types = (float,        float,      str,    datetime.datetime, str,       str,      str,       str)
 
     def __init__(self, *args, **kwargs):
-        for k, v in dict(*args, **kwargs).iteritems():
+        for k, v in dict(*args, **kwargs).items():
             self[k] = v
 
     def __setitem__(self, key, new):
@@ -64,7 +65,7 @@ class FrameInfo(dict):
         if type(new) != t:
             try:
                 new = t(new)
-            except StandardError as e:
+            except Exception as e:
                 raise TypeError("Conversion to %s failed for %s: %s" % (t, key, e))
 
         dict.__setitem__(self, key, new)
@@ -89,59 +90,59 @@ class FrameInfo(dict):
             self["camera"] = "SBIG ST-402"
         # Parse my own FITS header.
         else:
-            if header.has_key("TEMP"):
+            if "TEMP" in header:
                 self["temperature"] = header["TEMP"]
 
-            if header.has_key("EXPOSURE"):
+            if "EXPOSURE" in header:
                 self["exposure"] = header["EXPOSURE"]
 
-            if header.has_key("GAIN"):
+            if "GAIN" in header:
                 self["gain"] = header["GAIN"]
 
-            if header.has_key("DATETIME"):
+            if "DATETIME" in header:
                 try:
                     t = datetime.datetime.strptime(header["DATETIME"], "%Y-%m-%dT%H:%M:%S")
                 except ValueError:
                     t = datetime.datetime.strptime(header["DATETIME"], "%Y-%m-%dT%H:%M:%S.%f")
                 self["datetime"] = t
 
-            if header.has_key("ROMODE"):
+            if "ROMODE" in header:
                 self["ro_mode"] = header["ROMODE"]
 
-            if header.has_key("CAMERA"):
+            if "CAMERA" in header:
                 self["camera"] = header["CAMERA"]
 
             # Use non-special key COMMNT
-            if header.has_key("COMMNT"):
+            if "COMMNT" in header:
                 self["comment"] = header["COMMNT"]
-            elif header.has_key("COMMENT"):
+            elif "COMMENT" in header:
                 self["comment"] = header["COMMENT"]
 
     def update_fits_header(self, header):
-        if self.has_key("temperature"):
+        if "temperature" in self:
             header.update("TEMP", self["temperature"], "Detector temperature")
 
-        if self.has_key("exposure"):
+        if "exposure" in self:
             header.update("EXPOSURE", self["exposure"], "Exposure time in secs")
 
-        if self.has_key("gain"):
+        if "gain" in self:
             header.update("GAIN", self["gain"], "Gain")
 
-        if self.has_key("datetime"):
+        if "datetime" in self:
             header.update("DATETIME", self["datetime"].isoformat(), "Date and time the frame was taken")
 
-        if self.has_key("ro_mode"):
+        if "ro_mode" in self:
             header.update("ROMODE", self["ro_mode"], "Read-out mode")
 
-        if self.has_key("camera"):
+        if "camera" in self:
             header.update("CAMERA", self["camera"], "Camera ID")
 
         # Use non-special key COMMNT to work around bug in pyfits
-        if self.has_key("comment"):
+        if "comment" in self:
             header.update("COMMNT", self["comment"], "Frame comment")
 
     def update(self, *args, **kwargs):
-        for k, v in dict(*args, **kwargs).iteritems():
+        for k, v in dict(*args, **kwargs).items():
             self[k] = v
 
 
@@ -169,22 +170,22 @@ class FrameSetInfo(FrameInfo):
         `image`. Otherwise (default) the primary header data is updated.
         """
         if image < 0:
-            if self.has_key("temperature"):
+            if "temperature" in self:
                 header.update("TEMP", self["temperature"], "Detector temperature")
 
-            if self.has_key("exposure"):
+            if "exposure" in self:
                 header.update("EXPOSURE", self["exposure"], "Exposure time in secs")
 
-            if self.has_key("gain"):
+            if "gain" in self:
                 header.update("GAIN", self["gain"], "Gain")
 
-            if self.has_key("datetime"):
+            if "datetime" in self:
                 header.update("DATETIME", self["datetime"].isoformat(), "Date and time the frame was taken")
 
-            if self.has_key("set_comment"):
+            if "set_comment" in self:
                 header.update("SETCOMM", self["set_comment"], "Data set comment")
 
-            if self.has_key("ro_mode"):
+            if "ro_mode" in self:
                 header.update("ROMODE", self["ro_mode"], "Read-out mode")
         else:
             try:
@@ -276,7 +277,7 @@ class TarFile(object):
 
         try:
             framenum = int(os.path.splitext(n)[0].split("_")[-1])
-        except StandardError as err:
+        except Exception as err:
             raise ValueError("Failed to extract frame number: %s" % err)
 
         fi["comment"] = "Frame #%d" % framenum
@@ -350,7 +351,7 @@ def mk_key_function(*keys):
                     return None
             fcns.append(dir_fcn)
 
-        elif callable(key):
+        elif isinstance(key, collections.Callable):
             fcns.append(key)
 
         elif isinstance(key, str):

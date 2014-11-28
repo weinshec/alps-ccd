@@ -246,8 +246,8 @@ class SPEReader(object):
         import ROOT
         nx, ny = self.shape
         histo = ROOT.TH2I(name, title, nx, 0, nx, ny, 0, ny)
-        for ix in xrange(nx):
-            for iy in xrange(ny):
+        for ix in range(nx):
+            for iy in range(ny):
                 histo.SetBinContent(ix+1, iy+1, self.data[ix, iy])
         return histo
 
