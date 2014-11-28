@@ -4,6 +4,7 @@ import numpy as np
 from ccd.analysis import roi
 
 
+
 class ROIBasicTest(unittest.TestCase):
     def setUp(self):
         self.mask = np.zeros((5, 5), dtype=np.bool)
@@ -169,13 +170,37 @@ class BoundaryTest_PurePython(unittest.TestCase):
 
 
 if roi.weave is not None:
-
     class BoundaryTest_Weave(BoundaryTest_PurePython):
         def setUp(self):
             self.get_boundary_mask = roi.get_boundary_mask_weave
 
         def test_name(self):
             self.assertEqual(self.get_boundary_mask.__name__, "get_boundary_mask_weave")
+
+
+class HelperTest(unittest.TestCase):
+    def test_py2_round(self):
+        f = roi.round_afz
+
+        self.assertIsInstance(f(1.0), int)
+        self.assertEqual(1, f(1.49))
+        self.assertEqual(2, f(1.5))
+        self.assertEqual(2, f(1.7))
+
+        self.assertEqual(2, f(2.4))
+        self.assertEqual(3, f(2.5))
+        self.assertEqual(3, f(2.7))
+
+        self.assertEqual(3, f(3.4))
+        self.assertEqual(4, f(3.5))
+        self.assertEqual(4, f(3.7))
+
+        self.assertEqual(0, f(-0.4))
+        self.assertEqual(-1, f(-0.5))
+        self.assertEqual(-1, f(-1.4))
+        self.assertEqual(-2, f(-1.5))
+        self.assertEqual(-2, f(-2.4))
+        self.assertEqual(-3, f(-2.5))
 
 
 if __name__ == "__main__":

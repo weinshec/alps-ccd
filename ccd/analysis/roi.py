@@ -117,11 +117,23 @@ class ROI(object):
         inv._mask = np.logical_not(self.mask)
         return inv
 
-def py2_round(x):
+def round_afz(x):
+    """Replicate Python2's "away from zero" `round()` function.
+
+    Parameters
+    ----------
+    x : float
+
+    Returns
+    -------
+    rounded : int
+        Rounded number. At ties, e.g. 2.5 or -1.5, the result is rounded
+        away from zero resulting in 3 or -1, respectively.
     """
-    See http://python3porting.com/differences.html#rounding-behavior
-    """
-    return int(math.floor((x) + math.copysign(0.5, x)))
+    if x > 0:
+        return int(math.floor(x + 0.5))
+    else:
+        return int(math.ceil(x - 0.5))
 
 
 
@@ -165,12 +177,12 @@ class RectangleROI(MovableROI):
     def _get_mask(self):
         mask = np.zeros(self.shape, dtype=np.bool)
         hh = 0.5 * self.height
-        ymin = max(0, py2_round(self.y - hh))
-        ymax = min(self.shape[0], py2_round(self.y + hh))
+        ymin = max(0, round_afz(self.y - hh))
+        ymax = min(self.shape[0], round_afz(self.y + hh))
 
         hw = 0.5 * self.width
-        xmin = max(0, py2_round(self.x - hw))
-        xmax = min(self.shape[1], py2_round(self.x + hw))
+        xmin = max(0, round_afz(self.x - hw))
+        xmax = min(self.shape[1], round_afz(self.x + hw))
 
         mask[ymin:ymax, xmin:xmax] = True
         return mask
@@ -187,29 +199,25 @@ class BoxROI(MovableROI):
     def _get_mask(self):
         mask = np.zeros(self.shape, dtype=np.bool)
 
-        # Simple short-cut
-        # TODO [Python3] round() is not rounding n.5 to n+1 anymore
-        rint = lambda x: int(py2_round(x))
-
         # Set outer rectangle True
         hh = 0.5 * self.outer_height
-        ymin = max(0, rint(self.y - hh))
-        ymax = min(self.shape[0], rint(self.y + hh))
+        ymin = max(0, round_afz(self.y - hh))
+        ymax = min(self.shape[0], round_afz(self.y + hh))
 
         hw = 0.5 * self.outer_width
-        xmin = max(0, rint(self.x - hw))
-        xmax = min(self.shape[1], rint(self.x + hw))
+        xmin = max(0, round_afz(self.x - hw))
+        xmax = min(self.shape[1], round_afz(self.x + hw))
 
         mask[ymin:ymax, xmin:xmax] = True
 
         # Overwrite inner rectangle with False
         hh = 0.5 * self.inner_height
-        ymin = max(0, rint(self.y - hh))
-        ymax = min(self.shape[0], rint(self.y + hh))
+        ymin = max(0, round_afz(self.y - hh))
+        ymax = min(self.shape[0], round_afz(self.y + hh))
 
         hw = 0.5 * self.inner_width
-        xmin = max(0, rint(self.x - hw))
-        xmax = min(self.shape[1], rint(self.x + hw))
+        xmin = max(0, round_afz(self.x - hw))
+        xmax = min(self.shape[1], round_afz(self.x + hw))
 
         mask[ymin:ymax, xmin:xmax] = False
 
