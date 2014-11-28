@@ -29,7 +29,7 @@ def profiles(frames, axes=None, corr_offset=False):
     colors = cycle("rgbm")
     linestyles = cycle(("-", "--", ":"))
 
-    for i, c, ls in zip(xrange(len(frames)), colors, linestyles):
+    for i, c, ls in zip(range(len(frames)), colors, linestyles):
         axes[0].plot(data_0[i], color=c, linestyle=ls)
         axes[1].plot(data_1[i], color=c, linestyle=ls)
 

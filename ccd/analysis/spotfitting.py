@@ -26,7 +26,7 @@ def fwhm(data, axis=None):
     http://www.mail-archive.com/numpy-discussion@lists.sourceforge.net/msg03469.html
     """
     if axis is None:
-        return [fwhm(data, ax) for ax in xrange(data.ndim)]
+        return [fwhm(data, ax) for ax in range(data.ndim)]
 
     axes = np.r_[0:axis, axis+1:data.ndim]
     d = np.apply_over_axes(np.mean, data, axes).flatten()
