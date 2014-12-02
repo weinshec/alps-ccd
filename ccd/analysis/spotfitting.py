@@ -116,3 +116,110 @@ class GaussContExpo(object):
         """Calculate the integral under the spot ignoring the offset."""
         A, mu0, mu1, sigma0, sigma1, xi, offset = self.param_values
         return 2.0 * np.pi * sigma0 * sigma1 * A * (1.0 + np.exp(-0.5 * xi**2) / xi**2)
+
+
+
+class Gauss2D(object):
+    """Fit a 2D Gaussian to `data`."""
+    param_names = ("A", "mu0", "mu1", "sigma0", "sigma1", "theta", "offset")
+    def __init__(self, *args, **kwargs):
+        """Initialize Gauss2D object"""
+
+        if not args and not kwargs:
+            self.param_values = [None] * len(self.param_names)
+        else:
+            self.update_params(*args, **kwargs)
+
+    def update_params(self, *args, **kwargs):
+        """Update distribution parameters of 2D gaussian"""
+
+        if args and kwargs:
+            raise ValueError("Only *args or **kwargs accepted")
+        if args:
+            if len(args) != len(self.param_names):
+                raise ValueError("Wrong number of parameters in *args")
+
+            self.param_values = args
+        else:
+            for k, v in kwargs.items():
+                i = self.param_names.index(k)
+                self.param_values[i] = v
+
+    @property
+    def param_dict(self):
+        """Return distribution parameters as dictionary"""
+        return dict(zip(self.param_names, self.param_values))
+
+    @staticmethod
+    def func(xy, amplitude, xo, yo, sigma_x, sigma_y, theta, offset):
+        """Analytic definition of 2D gaussian distribution"""
+        xo = float(xo)
+        yo = float(yo)    
+        a = (np.cos(theta)**2)/(2*sigma_x**2) + (np.sin(theta)**2)/(2*sigma_y**2)
+        b = -(np.sin(2*theta))/(4*sigma_x**2) + (np.sin(2*theta))/(4*sigma_y**2)
+        c = (np.sin(theta)**2)/(2*sigma_x**2) + (np.cos(theta)**2)/(2*sigma_y**2)
+        g = offset + amplitude*np.exp( - (a*((xy[0]-xo)**2) + 2*b*(xy[0]-xo)*(xy[1]-yo) 
+                                + c*((xy[1]-yo)**2)))
+        return g.ravel()
+
+    def initial_guess(self, data):
+        """Guess distribution parameters based on given dataset
+
+        Parameters:
+            data : ndarray
+                data numpy array of dimension 2
+        """
+
+        mu0, mu1 = np.unravel_index(data.argmax(), data.shape)
+        fwhm0 = fwhm(data[:,mu1] - data[:,mu1].min())[0]
+        fwhm1 = fwhm(data[mu0] - data[mu0].min())[0]
+
+        self.update_params(
+                data.max() - data.min(),
+                mu0, mu1,
+                (fwhm0[1] - fwhm0[0]) / 2.35,
+                (fwhm1[1] - fwhm1[0]) / 2.35,
+                0.0,
+                data.min()
+                )
+
+    def fit(self, data):
+        """Perform leastsquares fit of 2D gaussian to given data
+
+        Parameters:
+            data : ndarray
+                numpy array to perform the fit on (dim = 2)
+        """
+
+        size = data.shape
+        x = np.linspace(0, size[0], size[0])
+        y = np.linspace(0, size[1], size[1])
+        xy = np.meshgrid(x, y)
+
+        popt, pcov = scipy.optimize.curve_fit(self.func, xy, data.ravel(), p0=self.param_values)
+        self.update_params(*popt)
+
+    def evaluate(self, xy, ignoreOffset=False):
+        """Evaluate the 2D gaussian function at a given point
+        
+        Parameters:
+            xy : (x, y)
+                tuple of float positions to evaluate the gaussian at
+        Returns:
+            v : float
+                the values of the gaussian at this position
+        """
+
+        if ignoreOffset:
+            v = self.func(xy, *self.param_values) - self.param_dict['offset']
+        else:
+            v = self.func(xy, *self.param_values)
+
+        return v
+                
+    def integral(self):
+        """Calculate the integral under the spot ignoring the offset"""
+
+        A, mu0, mu1, sigma_x, sigma_y, theta, offset = self.param_values
+
+        return A * 2 * np.pi * sigma_x * sigma_y
