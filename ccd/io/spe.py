@@ -9,8 +9,8 @@ import numpy as np
 
 
 _month_names = [
-        ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-        ["Jan", "Feb", "Mae", "Apr", "Mai", "Jun", "Jul", "Aug", "Sep", "Okt", "Nov", "Dez"],
+        [b"Jan", b"Feb", b"Mar", b"Apr", b"May", b"Jun", b"Jul", b"Aug", b"Sep", b"Oct", b"Nov", b"Dec"],
+        [b"Jan", b"Feb", b"Mae", b"Apr", b"Mai", b"Jun", b"Jul", b"Aug", b"Sep", b"Okt", b"Nov", b"Dez"],
         ]
 
 
@@ -53,8 +53,8 @@ class SPEReader(object):
                   1 : np.int32,
                   2 : np.int16,
                   3 : np.uint16 }
-    _readoutrates = {"\x0c\x00" : "2MHz",
-                     "\x06\x00" : "100kHz"}
+    _readoutrates = {b"\x0c\x00" : "2MHz",
+                     b"\x06\x00" : "100kHz"}
     # TODO: find the correct values.
     _shuttercontrols = {}
 
