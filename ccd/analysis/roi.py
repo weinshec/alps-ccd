@@ -1,14 +1,23 @@
 """A collection of patters and ROIs.
 """
+
 import logging
+import math
+
+# Python{2,3} compatibility 
+try:
+    from itertools import izip as zip
+except ImportError:
+    pass
+from itertools import product
+
 import numpy as np
-from itertools import izip, product
 
 try:
     from scipy import weave
 except ImportError:
     logging.error("Failed to import scipy.weave"
-                  "\n  get_boundary_mask may be slow!")
+                  "\n  get_boundary_mask() may be slow!")
     weave = None
 
 
@@ -108,6 +117,25 @@ class ROI(object):
         inv._mask = np.logical_not(self.mask)
         return inv
 
+def round_afz(x):
+    """Replicate Python2's "away from zero" `round()` function.
+
+    Parameters
+    ----------
+    x : float
+
+    Returns
+    -------
+    rounded : int
+        Rounded number. At ties, e.g. 2.5 or -1.5, the result is rounded
+        away from zero resulting in 3 or -1, respectively.
+    """
+    if x > 0:
+        return int(math.floor(x + 0.5))
+    else:
+        return int(math.ceil(x - 0.5))
+
+
 
 class MovableROI(ROI):
     fmt = "<{self.__class__.__name__} object of shape:{self.shape} at [x:{self.x} y:{self.y}]>"
@@ -149,12 +177,12 @@ class RectangleROI(MovableROI):
     def _get_mask(self):
         mask = np.zeros(self.shape, dtype=np.bool)
         hh = 0.5 * self.height
-        ymin = max(0, int(round(self.y - hh)))
-        ymax = min(self.shape[0], int(round(self.y + hh)))
+        ymin = max(0, round_afz(self.y - hh))
+        ymax = min(self.shape[0], round_afz(self.y + hh))
 
         hw = 0.5 * self.width
-        xmin = max(0, int(round(self.x - hw)))
-        xmax = min(self.shape[1], int(round(self.x + hw)))
+        xmin = max(0, round_afz(self.x - hw))
+        xmax = min(self.shape[1], round_afz(self.x + hw))
 
         mask[ymin:ymax, xmin:xmax] = True
         return mask
@@ -171,28 +199,25 @@ class BoxROI(MovableROI):
     def _get_mask(self):
         mask = np.zeros(self.shape, dtype=np.bool)
 
-        # Simple short-cut
-        rint = lambda x: int(round(x))
-
         # Set outer rectangle True
         hh = 0.5 * self.outer_height
-        ymin = max(0, rint(self.y - hh))
-        ymax = min(self.shape[0], rint(self.y + hh))
+        ymin = max(0, round_afz(self.y - hh))
+        ymax = min(self.shape[0], round_afz(self.y + hh))
 
         hw = 0.5 * self.outer_width
-        xmin = max(0, rint(self.x - hw))
-        xmax = min(self.shape[1], rint(self.x + hw))
+        xmin = max(0, round_afz(self.x - hw))
+        xmax = min(self.shape[1], round_afz(self.x + hw))
 
         mask[ymin:ymax, xmin:xmax] = True
 
         # Overwrite inner rectangle with False
         hh = 0.5 * self.inner_height
-        ymin = max(0, rint(self.y - hh))
-        ymax = min(self.shape[0], rint(self.y + hh))
+        ymin = max(0, round_afz(self.y - hh))
+        ymax = min(self.shape[0], round_afz(self.y + hh))
 
         hw = 0.5 * self.inner_width
-        xmin = max(0, rint(self.x - hw))
-        xmax = min(self.shape[1], rint(self.x + hw))
+        xmin = max(0, round_afz(self.x - hw))
+        xmax = min(self.shape[1], round_afz(self.x + hw))
 
         mask[ymin:ymax, xmin:xmax] = False
 
@@ -333,11 +358,11 @@ def get_boundary_mask_pure_python(spot, withdiag=False, width=1, out=None, where
         bounds = out
     bounds.fill(False)
 
-    t = range(-width, width+1)
+    t = list(range(-width, width+1))
     if withdiag:
         idx_deltas = list(product(t, t))
     else:
-        idx_deltas = [(dx, dy) for dx in t for dy in t if (abs(dx) + abs(dy) <= width)]
+        idx_deltas = [(dy, dx) for dx in t for dy in t if (abs(dx) + abs(dy) <= width)]
     idx_deltas.remove((0, 0))
 
     n_y, n_x = bounds.shape
@@ -346,7 +371,7 @@ def get_boundary_mask_pure_python(spot, withdiag=False, width=1, out=None, where
         Y, X = np.where(spot)
     else:
         Y, X = where
-    for y, x in izip(Y, X):
+    for y, x in zip(Y, X):
         for dy, dx in idx_deltas:
             t = y + dy
             s = x + dx

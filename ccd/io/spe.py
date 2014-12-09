@@ -2,7 +2,7 @@
 # <http://mail.scipy.org/pipermail/scipy-user/2007-November/014673.html>)
 # and the WinView documentation.
 #
-# Copyright 2010-2012  Jan Eike von Seggern jvonsegg@cern.ch
+# Copyright 2010-2012  Jan Eike von Seggern jan.eike.von.seggern@desy.de
 
 import datetime
 import numpy as np
@@ -186,7 +186,7 @@ class SPEReader(object):
                 except ValueError:
                     pass
             if month <= 0:
-                print "Error: Could not parse month name in SPE header: %s" % (date[2:5])
+                print("Error: Could not parse month name in SPE header: %s" % (date[2:5]))
                 month = 1
             year = int(date[5:])
 
@@ -246,8 +246,8 @@ class SPEReader(object):
         import ROOT
         nx, ny = self.shape
         histo = ROOT.TH2I(name, title, nx, 0, nx, ny, 0, ny)
-        for ix in xrange(nx):
-            for iy in xrange(ny):
+        for ix in range(nx):
+            for iy in range(ny):
                 histo.SetBinContent(ix+1, iy+1, self.data[ix, iy])
         return histo
 
@@ -258,11 +258,10 @@ if __name__  ==  "__main__":
         sys.exit("Usage:  %s  FILE.spe [...]" % sys.argv[0])
     for path in sys.argv[1:]:
         spe = SPEReader(path)
-        print "Frame taken at:", spe.datetime
-        print "Read-out rate:", spe.readoutrate
-        print "Datatype:", spe.dtype
-        print "Temp:", spe.temp
-        print "Exposure time:", spe.exposure
-        print "Data shape:", spe.data.shape
-        print "Max value:", spe.data.max()
-
+        print("Frame taken at:", spe.datetime)
+        print("Read-out rate:", spe.readoutrate)
+        print("Datatype:", spe.dtype)
+        print("Temp:", spe.temp)
+        print("Exposure time:", spe.exposure)
+        print("Data shape:", spe.data.shape)
+        print("Max value:", spe.data.max())

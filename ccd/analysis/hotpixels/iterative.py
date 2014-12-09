@@ -2,7 +2,7 @@ from itertools import product
 import numpy as np
 from scipy import stats
 
-from ccd.analysis import roi
+from .. import roi
 
 __all__ = ['IterativeFlagger', 'flag_per_row', 'flag_in_neighborhood', 'DirectNeighborFlagged']
 
@@ -47,7 +47,7 @@ class IterativeFlagger(object):
     def flagged(self):
         return np.logical_not(self.valid)
 
-    def next(self):
+    def __next__(self):
         # whole-data index of the maximal value of remaining valid data
         i_max = self.idx[self._valid][self.data[self._valid].argmax()]
         self._valid[i_max] = False
@@ -57,6 +57,9 @@ class IterativeFlagger(object):
             return i_max
         self._valid[i_max] = True
         raise StopIteration
+
+    # Python2 compatibility
+    next = __next__
 
     def __iter__(self):
         return self

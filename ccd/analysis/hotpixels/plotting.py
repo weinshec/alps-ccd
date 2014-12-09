@@ -3,13 +3,12 @@ Functions to visualize spotlists.
 """
 
 from itertools import groupby
-
 import numpy as np
 
-from ...tools.plotting import axes_helper, kw_helper, share_axis, zmatshow
-from ..info import mk_key_function
+from plttools import axes_helper, kw_helper, share_axis, zmatshow
 
-from spotlist import spot_mask, spot_integ
+from ccd.io.info import mk_key_function
+from .spotlist import spot_mask, spot_integral
 
 
 def spot_integ_hist(spotlists, ax=None, correctbgd=True, **histkw):
@@ -24,10 +23,10 @@ def spot_integ_hist(spotlists, ax=None, correctbgd=True, **histkw):
 
     for (d, expos), sub_sls in groupby(spotlists, mk_key_function("dir", "exposure")):
         l = "dir: %s\nexpos: %f" % (d, expos)
-        print l
+        print(l)
         integs = []
         for sl in sub_sls:
-            integs.append(spot_integ(sl, correctbgd))
+            integs.append(spot_integral(sl, correctbgd))
         integs = np.concatenate(integs)
         ax.hist(integs, label=l, **histkw)
 

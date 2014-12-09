@@ -1,10 +1,10 @@
 from functools import wraps
 import numpy as np
+
 from ccd.io.frame import Frame
 
 
-
-def _safe_slice(a):
+def safe_slice(a):
     """If possible convert `a` into a `slice` object.
 
     Returns
@@ -15,7 +15,7 @@ def _safe_slice(a):
         `True` if `ret` is a `slice`.
     """
     if a is None:
-        return _safe_slice((None, None))
+        return safe_slice((None, None))
     elif type(a) == slice:
         return a, True
     elif len(a) == 2:
@@ -43,8 +43,8 @@ class plain_offset(object):
             return cls(offset_rows, offset_cols)(frame)
 
     def __init__(self, offset_rows, offset_cols):
-        self.offset_rows, isslice_rows = _safe_slice(offset_rows)
-        self.offset_cols, isslice_cols = _safe_slice(offset_cols)
+        self.offset_rows, isslice_rows = safe_slice(offset_rows)
+        self.offset_cols, isslice_cols = safe_slice(offset_cols)
         self.comment = "row-wise offset estimated from averaged"
         if isslice_rows:
             self.comment += " rows [{0}:{1}]".format(
@@ -80,13 +80,13 @@ class rowwise_offset(object):
     """
     def __new__(cls, offset_cols, frame=None):
         if frame is None:
-            obj = super(rowwise_offset, cls).__new__(cls, offset_cols)
+            obj = super(rowwise_offset, cls).__new__(cls)
             return obj
         else:
             return cls(offset_cols)(frame)
 
     def __init__(self, offset_cols):
-        self.offset_cols, isslice= _safe_slice(offset_cols)
+        self.offset_cols, isslice = safe_slice(offset_cols)
         if isslice:
             self.comment = "row-wise offset estimated from averaged columns [{0}:{1}]".format(
                     self.offset_cols.start if self.offset_cols.start else "",
@@ -112,9 +112,21 @@ def _check_shape(f):
 class FrameNormalizer(object):
     """A little helper to correct PIXIS frames using the overscan columns."""
     def __init__(self, valid_shape, data_rows, data_cols, offset_estimator, get_fpn=None):
+        """
+        Parameters
+        ----------
+        valid_shape : tuple
+            (nrows, ncolumns)
+        data_rows, data_cols:
+            The rows and columns of the data region. `(a,b)` pairs are
+            converted to slices. See :func:`safe_slice`.
+        offset_estimator : callable
+            Callable that returns offset frame, which is subtracted from
+            data. See :meth:`correct_offset`.
+        """
         self.valid_shape = valid_shape
-        self.data_rows = data_rows
-        self.data_cols = data_cols
+        self.data_rows = safe_slice(data_rows)[0]
+        self.data_cols = safe_slice(data_cols)[0]
         self.offset_estimator = offset_estimator
         self.get_fpn = get_fpn
 
