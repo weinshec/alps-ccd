@@ -1,8 +1,9 @@
 import unittest
 from itertools import combinations
 import numpy as np
+from scipy.stats import norm
 
-from ccd.analysis.spotfitting import fwhm
+from ccd.analysis.spotfitting import fwhm, Gauss2D, GaussContExpo
 from ccd.analysis.normalize import rowwise_offset, FrameNormalizer
 
 class TestHelperFunctions(unittest.TestCase):
@@ -92,6 +93,42 @@ class TestNormalize(unittest.TestCase):
         rows.remove(y_max)
         for y1, y2 in combinations(rows, 2):
             self.assertTrue((data_region[y1] - data_region[y2] < 1e-14).all())
+
+
+class TestFitting(unittest.TestCase):
+    def testGaussian2D(self):
+        gauss2d = Gauss2D(0.5/np.pi, 0.0, 0.0, 1.0, 1.0, 0.0, 0.0)
+
+        self.assertEqual(gauss2d.integral(), 1.0)
+        self.assertEqual(gauss2d.evaluate(0.0, 0.0), 0.5/np.pi)
+
+        gauss2d.update_params(mu0=-78.9)
+        self.assertEqual(gauss2d.evaluate(-78.9, 0.0), 0.5/np.pi)
+        self.assertGreater(gauss2d.evaluate(-78.9, 0.0), gauss2d.evaluate(-78.9, 1.0))
+
+        gauss2d.update_params(offset=1234.5)
+        self.assertEqual(gauss2d.integral(), 1.0)
+
+        # Test the actual fitting.
+        mu0 = 40.0
+        mu1 = 60.0
+        sigma0 = 10.0
+        sigma1 = 7.0
+        x = np.arange(100)
+        X0, X1 = np.meshgrid(x, x, indexing="ij")
+        Z = norm.pdf((X0 - mu0) / sigma0) * norm.pdf((X1 - mu1) / sigma1)
+
+        gauss2d.initial_guess(Z)
+        gauss2d.fit(Z)
+        self.assertAlmostEqual(gauss2d.param_dict["mu0"], mu0)
+        self.assertAlmostEqual(gauss2d.param_dict["mu1"], mu1)
+        self.assertAlmostEqual(gauss2d.param_dict["sigma0"], sigma0)
+        self.assertAlmostEqual(gauss2d.param_dict["sigma1"], sigma1)
+
+
+
+
+
 
 
 
