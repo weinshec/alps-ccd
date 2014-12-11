@@ -8,6 +8,7 @@ import datetime
 import numpy as np
 
 
+# binary ascii representation of months in the SPE header
 _month_names = [
         [b"Jan", b"Feb", b"Mar", b"Apr", b"May", b"Jun", b"Jul", b"Aug", b"Sep", b"Oct", b"Nov", b"Dec"],
         [b"Jan", b"Feb", b"Mae", b"Apr", b"Mai", b"Jun", b"Jul", b"Aug", b"Sep", b"Okt", b"Nov", b"Dez"],
